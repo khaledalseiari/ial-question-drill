@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IAL Question Drill</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #dedcd4;
+    --accent: #2f5d50; --accent-ink: #ffffff; --good: #2f7a45; --mid: #b07a12; --bad: #b0412e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161615; --panel: #212120; --ink: #ecebe6; --muted: #9c9b94; --line: #353532;
+            --accent: #7fb8a4; --accent-ink: #10201b; --good: #6fc38a; --mid: #e0b04c; --bad: #e4796a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 900px; margin: 0 auto; padding: 12px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  h1 { font-size: 17px; margin: 0; letter-spacing: -0.01em; }
+  .score { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+  main { max-width: 900px; margin: 0 auto; padding: 16px; }
+  details.filters { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; }
+  details.filters summary { cursor: pointer; font-weight: 600; }
+  .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+  .group h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 4px; }
+  .topics { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line);
+          background: transparent; color: var(--muted); }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .chip.small { padding: 1px 8px; font-size: 12px; }
+  .group label { display: inline-flex; gap: 6px; align-items: center; margin-right: 12px; cursor: pointer; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; color: var(--muted); font-size: 13px; }
+  .tag { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; color: var(--ink); }
+  .meta a { color: var(--muted); }
+  .sheet { background: #fff; border-radius: 10px; border: 1px solid var(--line); overflow: hidden; }
+  .sheet canvas { display: block; width: 100%; height: auto; }
+  .sheet canvas + canvas { border-top: 1px dashed #d6d4cc; }
+  .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 0 6px; font-weight: 600; }
+  textarea { width: 100%; min-height: 140px; resize: vertical; padding: 12px; border-radius: 10px;
+             border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; }
+  textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  button { font: inherit; border-radius: 8px; padding: 9px 16px; border: 1px solid var(--line);
+           background: var(--panel); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  button.good { border-color: var(--good); color: var(--good); }
+  button.mid { border-color: var(--mid); color: var(--mid); }
+  button.bad { border-color: var(--bad); color: var(--bad); }
+  button:disabled { opacity: .5; cursor: default; }
+  .yours { white-space: pre-wrap; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .hidden { display: none; }
+  .loading { color: var(--muted); padding: 24px; text-align: center; }
+  kbd { font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--muted); }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <h1>IAL Question Drill</h1>
+  <span class="score" id="score"></span>
+</div></header>
+<main>
+  <details class="filters" id="filters">
+    <summary>Subjects, units &amp; topics <span id="pool" style="font-weight:400;color:var(--muted)"></span></summary>
+    <div class="groups" id="groups"></div>
+  </details>
+
+  <div class="meta" id="meta"></div>
+  <div class="sheet" id="question"><div class="loading">Loading questions…</div></div>
+
+  <div class="label">Your answer</div>
+  <textarea id="answer" placeholder="Type your answer, then press Ctrl/⌘ + Enter to check it against the mark scheme"></textarea>
+  <div class="actions">
+    <button class="primary" id="reveal">Show mark scheme</button>
+    <button id="skip">Skip</button>
+  </div>
+
+  <section id="result" class="hidden">
+    <div class="label">Your answer</div>
+    <div class="yours" id="yours"></div>
+    <div class="label">Mark scheme</div>
+    <div class="sheet" id="ms"></div>
+    <div class="label">How did you do?</div>
+    <div class="actions">
+      <button class="good" data-r="2">Got it</button>
+      <button class="mid" data-r="1">Partly</button>
+      <button class="bad" data-r="0">Missed it</button>
+    </div>
+    <p class="hint">Rating moves you on to the next random question. <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> also work.</p>
+  </section>
+  <p class="hint" style="margin-top:40px">Questions and mark schemes are © Pearson Edexcel. Papers load directly from
+  <a href="https://www.physicsandmathstutor.com/" style="color:inherit">Physics &amp; Maths Tutor</a>; this site stores only page positions and topic tags.</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+let all = [], deck = [], current = null;
+let enabled = new Set(store.get("enabled", []));
+let offTopics = new Set(store.get("offTopics", []));  // "Subject|Topic" the user switched off
+const stats = store.get("stats", { done: 0, got: 0, partly: 0, missed: 0 });
+
+// ---- PDF rendering -------------------------------------------------------
+const docs = new Map();
+function getDoc(path) {
+  if (!docs.has(path)) {
+    if (docs.size > 12) docs.delete(docs.keys().next().value);
+    docs.set(path, pdfjsLib.getDocument(path).promise);
+  }
+  return docs.get(path);
+}
+
+async function renderCrops(container, path, crops) {
+  const doc = await getDoc(path);
+  const width = container.clientWidth || 800;
+  for (const [p, x0, y0, x1, y1] of crops) {
+    const page = await doc.getPage(p + 1);
+    const scale = (width / (x1 - x0)) * (window.devicePixelRatio || 1);
+    const vp = page.getViewport({ scale, offsetX: -x0 * scale, offsetY: -y0 * scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil((x1 - x0) * scale);
+    canvas.height = Math.ceil((y1 - y0) * scale);
+    container.appendChild(canvas);
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+  }
+}
+
+// ---- Deck ----------------------------------------------------------------
+const groupKey = q => `${q.subject} ${q.unit}`;
+const topicKey = (subject, t) => `${subject}|${t}`;
+const inPool = q => enabled.has(groupKey(q)) && q.topics.some(t => !offTopics.has(topicKey(q.subject, t)));
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function rebuildDeck() {
+  deck = shuffle(all.filter(inPool));
+  $("pool").textContent = `· ${deck.length.toLocaleString()} questions in pool`;
+}
+
+function buildFilters() {
+  const bySubject = {};
+  for (const q of all) (bySubject[q.subject] ??= new Map()).set(q.unit, (bySubject[q.subject].get(q.unit) || 0) + 1);
+  if (!enabled.size) for (const q of all) enabled.add(groupKey(q));
+  $("groups").innerHTML = "";
+  for (const subject of ["Chemistry", "Biology", "Psychology"]) {
+    if (!bySubject[subject]) continue;
+    const g = document.createElement("div");
+    g.className = "group";
+    g.innerHTML = `<h3>${subject}</h3>`;
+    for (const [unit, n] of [...bySubject[subject]].sort()) {
+      const k = `${subject} ${unit}`;
+      const l = document.createElement("label");
+      l.innerHTML = `<input type="checkbox" ${enabled.has(k) ? "checked" : ""}> ${unit} <span style="color:var(--muted)">(${n})</span>`;
+      l.querySelector("input").onchange = e => {
+        e.target.checked ? enabled.add(k) : enabled.delete(k);
+        store.set("enabled", [...enabled]);
+        renderTopics(subject, g.querySelector(".topics"));
+        rebuildDeck();
+        next();
+      };
+      g.appendChild(l);
+    }
+    const tl = document.createElement("div");
+    tl.className = "topics";
+    g.appendChild(tl);
+    renderTopics(subject, tl);
+    $("groups").appendChild(g);
+  }
+}
+
+function renderTopics(subject, el) {
+  const counts = new Map();
+  for (const q of all) {
+    if (q.subject !== subject || !enabled.has(groupKey(q))) continue;
+    for (const t of q.topics) counts.set(t, (counts.get(t) || 0) + 1);
+  }
+  const names = [...counts.keys()].sort((a, b) => (a === "Other") - (b === "Other") || a.localeCompare(b));
+  el.innerHTML = "";
+  if (!names.length) return;
+  const setAll = on => {
+    for (const t of names) on ? offTopics.delete(topicKey(subject, t)) : offTopics.add(topicKey(subject, t));
+    saveTopics(subject, el);
+  };
+  for (const [label, on] of [["All", true], ["None", false]]) {
+    const b = document.createElement("button");
+    b.className = "chip small";
+    b.textContent = label;
+    b.onclick = () => setAll(on);
+    el.appendChild(b);
+  }
+  for (const t of names) {
+    const b = document.createElement("button");
+    const k = topicKey(subject, t);
+    b.className = "chip" + (offTopics.has(k) ? "" : " on");
+    b.textContent = `${t} · ${counts.get(t)}`;
+    b.setAttribute("aria-pressed", !offTopics.has(k));
+    b.onclick = () => { offTopics.has(k) ? offTopics.delete(k) : offTopics.add(k); saveTopics(subject, el); };
+    el.appendChild(b);
+  }
+}
+
+function saveTopics(subject, el) {
+  store.set("offTopics", [...offTopics]);
+  renderTopics(subject, el);
+  rebuildDeck();
+  if (!current || !inPool(current)) next();
+}
+
+function renderScore() {
+  const pct = stats.done ? Math.round((stats.got + stats.partly / 2) / stats.done * 100) : 0;
+  $("score").textContent = stats.done ? `${stats.done} answered · ${pct}%` : "";
+}
+
+let token = 0;
+async function next() {
+  const my = ++token;
+  if (!deck.length) rebuildDeck();
+  current = deck.pop();
+  $("answer").value = "";
+  $("result").classList.add("hidden");
+  $("reveal").disabled = false;
+  $("question").innerHTML = "";
+  $("ms").innerHTML = "";
+  if (!current) { $("question").innerHTML = `<div class="loading">Nothing matches — pick at least one unit and topic above.</div>`; $("meta").innerHTML = ""; return; }
+  $("meta").innerHTML = `<span class="tag">${current.subject} ${current.unit}</span>
+    <span>${current.session} · ${current.label} · ${current.topics.join(", ")}</span>
+    <a href="${current.qp}" target="_blank" rel="noopener">full paper</a>`;
+  try {
+    if (current.stem.length) await renderCrops($("question"), current.qp, current.stem);
+    if (my !== token) return;
+    await renderCrops($("question"), current.qp, current.q);
+  } catch (e) {
+    if (my === token) $("question").innerHTML = `<div class="loading">Couldn't render this question (${e.message}).</div>`;
+  }
+  $("answer").focus({ preventScroll: true });
+  window.scrollTo({ top: 0 });
+}
+
+async function reveal() {
+  if (!current || $("reveal").disabled) return;
+  $("reveal").disabled = true;
+  $("yours").textContent = $("answer").value.trim() || "(no answer typed)";
+  $("result").classList.remove("hidden");
+  await renderCrops($("ms"), current.ms, current.a);
+  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function rate(r) {
+  if ($("result").classList.contains("hidden")) return;
+  stats.done++;
+  stats[["missed", "partly", "got"][r]]++;
+  store.set("stats", stats);
+  renderScore();
+  next();
+}
+
+$("reveal").onclick = reveal;
+$("skip").onclick = next;
+document.querySelectorAll("[data-r]").forEach(b => b.onclick = () => rate(+b.dataset.r));
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); reveal(); }
+  else if (document.activeElement !== $("answer") && ["1", "2", "3"].includes(e.key)) rate(3 - +e.key);
+});
+
+fetch("data/questions.json").then(r => r.json()).then(data => {
+  all = data;
+  buildFilters();
+  rebuildDeck();
+  renderScore();
+  next();
+}).catch(() => {
+  $("question").innerHTML = `<div class="loading">Couldn't load the question bank.</div>`;
+});
+</script>
+</body>
+</html>
