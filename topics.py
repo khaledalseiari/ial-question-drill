@@ -105,7 +105,30 @@ MATHS_M2 = {
     "Kinematics with calculus": "variable acceleration:5, at time t seconds:3, t seconds:2, differentiat:4, integrat:4, dv/dt:4, velocity:2, v = :2, displacement:2, t 2:2, t2:2, comes to rest:3, instantaneous rest:5, s = :2",
 }
 
+PHY_U1 = {
+    "Motion & kinematics": "velocity:3, acceleration:3, displacement:3, speed:2, velocity-time:5, displacement-time:5, suvat:4, free fall:4, projectile:5, horizontally:3, vertically:2, scalar:4, vector:3, resolve:3, component:3, terminal velocity:2",
+    "Forces & Newton's laws": "newton's first:5, newton's second:5, newton's third:5, free-body:5, free body:5, resultant force:4, weight:2, normal contact:4, tension:3, friction:2, drag:3, equilibrium:3, moment:4, centre of gravity:4, principle of moments:5, torque:4, couple:3",
+    "Momentum": "momentum:5, conservation of momentum:5, collision:4, collide:4, impulse:3, recoil:4",
+    "Work, energy & power": "work done:5, kinetic energy:4, gravitational potential energy:5, potential energy:3, power:3, efficiency:4, efficient:3, energy:1, conservation of energy:4, watt:3",
+    "Fluids": "density:4, upthrust:5, archimedes:5, viscosity:5, viscous:4, stokes:5, laminar:5, turbulent:5, terminal velocity:4, falling-ball:5, fluid:4, flow:2, streamline:5",
+    "Materials": "hooke:5, extension:4, spring:3, stiffness:4, stress:4, strain:4, young modulus:5, young's modulus:5, elastic limit:5, limit of proportionality:5, yield point:5, plastic:4, elastic:3, brittle:5, ductile:5, hard:2, tough:4, malleable:5, breaking stress:5, ultimate tensile:5, elastic strain energy:5, force-extension:5, stress-strain:5, wire:2",
+}
+PHY_U2 = {
+    "Waves": "wave:3, wavelength:3, frequency:2, amplitude:3, transverse:5, longitudinal:5, progressive:4, phase:3, oscilloscope:4, pulse-echo:5, ultrasound:5, doppler:5, speed of sound:3, intensity:3",
+    "Superposition & stationary waves": "superposition:5, stationary wave:5, standing wave:5, node:5, antinode:5, interference:5, coherent:5, path difference:5, fundamental:3, harmonic:4, string:2, constructive:4, destructive:4",
+    "Refraction, diffraction & polarisation": "refraction:5, refractive index:5, critical angle:5, total internal reflection:5, snell:5, diffraction:5, diffraction grating:5, polaris:5, polariz:5, lens:4, focal length:5, power of a lens:5, real image:4, virtual image:4, magnification:3, optical fibre:4, reflection:2",
+    "Electric circuits": "current:3, potential difference:4, p.d:3, resistance:3, resistor:4, ohm:3, series:3, parallel:3, kirchhoff:5, potential divider:5, internal resistance:5, e.m.f:4, emf:4, terminal potential:5, ammeter:3, voltmeter:3, circuit:3, charge:2, drift velocity:5, i = nqva:5, power:1, electrical energy:3",
+    "Resistivity & I-V characteristics": "resistivity:5, i-v:5, i–v:5, characteristic:3, thermistor:5, ldr:5, light-dependent:5, diode:4, filament:4, ntc:5, semiconductor:4, metal:2, temperature:2, conductor:3",
+    "Particle nature of light": "photon:5, photoelectric:5, work function:5, threshold frequency:5, planck:4, electronvolt:4, electron volt:4, ev:2, energy level:5, emission spectrum:5, absorption spectrum:5, line spectr:5, wave-particle:5, wave–particle:5, de broglie:5, electron diffraction:5, quantum:3, excitation:4, ionisation:3, solar cell:3",
+}
+PHY_PRACTICAL = {
+    "Measurement & uncertainties": "uncertainty:5, uncertainties:5, percentage uncertainty:5, precision:4, precise:3, accuracy:3, accurate:3, micrometer:5, vernier:5, calipers:5, ruler:3, resolution:4, systematic error:5, random error:5, zero error:5, parallax:5, repeat:3, mean:3, average:3, safety:4, significant figures:3, plan:3, procedure:3, variable:3, control:2, determine:2",
+}
+
 TOPICS = {
+    ("Physics", "U1"): PHY_U1,
+    ("Physics", "U2"): PHY_U2,
+    ("Physics", "U3"): {**PHY_U1, **PHY_U2, **PHY_PRACTICAL},  # practical paper: draws on U1 + U2
     ("Physics", "U4"): PHY_U4,
     ("Maths", "P3"): MATHS_P3,
     ("Maths", "P4"): MATHS_P4,

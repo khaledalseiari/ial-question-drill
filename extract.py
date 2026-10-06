@@ -137,7 +137,7 @@ def parse_ms(path):
     # (mechanics questions also name points and particles Q)
     rows = {(p, round(y0 / 4)) for p, x, y0, y1, s, t in lns if re.match(r"^(Mark )?Schemes?$|^Marks?\b|^Answer|^Solution|^Working", t)}
     def is_hdr(t, p=None, y0=None):
-        if t.lower().startswith("question"):
+        if t.replace(" ", "").lower().startswith("question"):
             return True
         return t in ("Q", "Qu", "Q.") and p is not None and any((p, round(y0 / 4) + d) in rows for d in (-1, 0, 1))
     hx = [x for p, x, y0, y1, s, t in lns if is_hdr(t, p, y0)]
@@ -155,7 +155,7 @@ def parse_ms(path):
             continue
         hdr = [r for r in lns if r[0] == p and is_hdr(r[5], r[0], r[2]) and 0 < y0 - r[2] < 60 and abs(r[1] - x) < 40]
         strong = bool(m.group(2)) or not t.strip().isdigit()  # e.g. "3(a)", "2.", "1 alt"
-        labels.append((int(m.group(1)), m.group(2), p, (min(r[2] for r in hdr) if hdr else y0) - 6, x, strong, bool(hdr)))
+        labels.append((int(m.group(1)), m.group(2), p, (min(r[2] for r in hdr) if hdr else y0) - 6, x, y0, strong, bool(hdr)))
     labels.sort(key=lambda r: (r[2], r[3]))
     # stray numbers from worked solutions: keep labels in the main label column, in question order
     # label column = the 'Question' header's x on that page (carried forward to pages without one)
@@ -166,15 +166,25 @@ def parse_ms(path):
         cols[p] = col
     labels = [l for l in labels if cols[l[2]] is not None and abs(l[4] - cols[l[2]]) < 28]
     # a bare number is only a label if a header sits right above it or it lines up with real labels
-    strong_x = [l[4] for l in labels if l[5]]
-    anchor_x = strong_x + [l[4] for l in labels if l[6]]
-    labels = [l for l in labels if l[5] or l[6] or any(abs(l[4] - ax) < 1.5 for ax in anchor_x)]
+    anchors = [(l[2], l[3], l[4]) for l in labels if l[6] or l[7]]
+
+    def anchored(l):
+        same_page = [ax for ap, ay, ax in anchors if ap == l[2] and ay < l[3]]
+        if same_page:  # strict when the page has trustworthy labels to line up with
+            return any(abs(l[4] - ax) < 1.5 for ax in same_page)
+        return any(abs(l[4] - ax) < 8 for ap, ay, ax in anchors)
+    labels = [l for l in labels if l[6] or l[7] or anchored(l)]
     kept, last = [], 0
     for l in labels:
         if l[0] in (last, last + 1) or (not kept and l[0] <= 3):
-            kept.append(l[:4])
+            kept.append(list(l[:4]) + [l[5]])
             last = l[0]
-    labels = kept
+    # a label only gets the table header if no earlier label sits between them (shared tables)
+    for i in range(1, len(kept)):
+        prev, cur = kept[i - 1], kept[i]
+        if prev[2] == cur[2] and prev[3] >= cur[3] - 2:
+            cur[3] = cur[4] - 6
+    labels = [tuple(l[:4]) for l in kept]
     last = (len(doc) - 1, bottom(len(doc) - 1))
     segs = {}
     for i, (q, letter, p, y) in enumerate(labels):
