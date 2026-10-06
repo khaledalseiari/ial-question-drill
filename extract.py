@@ -10,11 +10,13 @@ TOP = 40  # skip running header; BOTTOM/X0/X1 are set per document (A4 vs Letter
 BOTTOM, MARGIN, RIGHT = 792, 28, 28
 DIMS = {}  # page -> (width, height) in displayed orientation
 
-Q_RE = re.compile(r"^(\d{1,2})(?:\s+|\s*(?=\())(.*)$")
+Q_RE = re.compile(r"^(\d{1,2})\.?(?:\s+|\s*(?=\()|(?<=\.)$)(.*)$")
 PART_RE = re.compile(r"^\(([a-z])\)")
-END_RE = re.compile(r"^\(Total for Question|^TOTAL FOR (SECTION|PAPER)|^BLANK PAGE|^Use this space for any rough")
-DOTS = re.compile(r"^(\d\s*)?[.\u2026 ]{8,}$")
-MS_LABEL_RE = re.compile(r"^(\d{1,2})\s*(?:\(?([a-h])\)?)?(?:\s*\(?([ivx]+)\)?)*\s*$")
+END_RE = re.compile(r"^\(Total for Question|^\(Total \d+ marks?\)|^TOTAL FOR (SECTION|PAPER)|^BLANK PAGE|^Use this space for any rough")
+DOTS = re.compile(r"^(\d\s*)?[._\u2026 ]{8,}$")
+# lines that carry no question content (answer-space pages in Maths papers)
+FILLER = re.compile(r"^Question \d+ continued|^\(Total for Question|^\(Total \d+ marks?\)|^DO NOT WRITE|^\(?\d+\)?$|^Leave\b|^blank$|^Q\d+$|^Turn over")
+MS_LABEL_RE = re.compile(r"^(\d{1,2})\.?\s*(?:\(?([a-h])\)?)?(?:\s*\(?([ivx]+)\)?)*\s*(?:[Aa]lt\w*\.?\s*\d*)?$")
 
 
 def lines(doc):
@@ -58,6 +60,8 @@ def span(lns, start, end):
         inside = [(a, t) for pp, x, a, b, s, t in lns if pp == p and top <= a < bot]
         while inside and DOTS.match(inside[-1][1]):
             bot = inside.pop()[0] - 2
+        if all(DOTS.match(t) or FILLER.match(t) for a, t in inside):
+            continue
         if bot - top > 12:
             crops.append([p, MARGIN, round(top, 1), round(DIMS[p][0] - RIGHT, 1), round(min(bot, bottom(p)), 1)])
     return crops
@@ -73,11 +77,11 @@ def set_frame(doc, qx, right=None):
     RIGHT = MARGIN if right is None else right
 
 
-def parse_qp(path):
+def parse_qp(path, split_parts=True):
     doc = pymupdf.open(path)
     lns = lines(doc)
     # question numbers sit in a fixed left column: take the most common x of "N  Text" lines
-    cands = [round(x) for p, x, y0, y1, s, t in lns if s >= 10.5 and x > 25 and re.match(r"^\d{1,2}\s+[A-Z(]", t)]
+    cands = [round(x) for p, x, y0, y1, s, t in lns if s >= 10.5 and x > 25 and re.match(r"^\d{1,2}(\.(\s|$)|\s+[A-Z(\[])", t)]
     qx = max(set(cands), key=cands.count) if cands else 43
     set_frame(doc, qx)
     starts = []  # (qnum, letter|None, page, y)
@@ -95,7 +99,7 @@ def parse_qp(path):
             cur_q, cur_letter = expect, None
             expect += 1
             rest = m.group(2)
-            pm = PART_RE.match(rest)
+            pm = PART_RE.match(rest) if split_parts else None
             if pm and pm.group(1) == "a":
                 cur_letter = "a"
                 starts.append((cur_q, None, p, y0 - 4))  # empty stem
@@ -103,7 +107,7 @@ def parse_qp(path):
             else:
                 starts.append((cur_q, None, p, y0 - 4))
             continue
-        pm = PART_RE.match(t)
+        pm = PART_RE.match(t) if split_parts else None
         if pm and cur_q and qx + 8 < x < qx + 42:
             want = "a" if cur_letter is None else string.ascii_lowercase[string.ascii_lowercase.index(cur_letter) + 1]
             if pm.group(1) == want:
@@ -129,7 +133,14 @@ def parse_qp(path):
 def parse_ms(path):
     doc = pymupdf.open(path)
     lns = lines(doc)
-    hx = [x for p, x, y0, y1, s, t in lns if t.startswith("Question")]
+    # a bare "Q" only counts as the column header when it shares a row with "Scheme"/"Marks"
+    # (mechanics questions also name points and particles Q)
+    rows = {(p, round(y0 / 4)) for p, x, y0, y1, s, t in lns if re.match(r"^(Mark )?Schemes?$|^Marks?\b|^Answer|^Solution|^Working", t)}
+    def is_hdr(t, p=None, y0=None):
+        if t.lower().startswith("question"):
+            return True
+        return t in ("Q", "Qu", "Q.") and p is not None and any((p, round(y0 / 4) + d) in rows for d in (-1, 0, 1))
+    hx = [x for p, x, y0, y1, s, t in lns if is_hdr(t, p, y0)]
     set_frame(doc, min(hx, default=43), right=12)  # mark schemes have a 'Mark' column near the edge
     labels = []  # (q, letter, page, y)
     for i, (p, x, y0, y1, size, t) in enumerate(lns):
@@ -142,9 +153,28 @@ def parse_ms(path):
         # must sit in the 'Question Number' column; include the header row when it is directly above
         if not any(abs(hx_ - x) < 40 for hx_ in hx):
             continue
-        hdr = [r for r in lns if r[0] == p and r[5].startswith("Question") and 0 < y0 - r[2] < 60 and abs(r[1] - x) < 40]
-        labels.append((int(m.group(1)), m.group(2), p, (min(r[2] for r in hdr) if hdr else y0) - 6))
+        hdr = [r for r in lns if r[0] == p and is_hdr(r[5], r[0], r[2]) and 0 < y0 - r[2] < 60 and abs(r[1] - x) < 40]
+        strong = bool(m.group(2)) or not t.strip().isdigit()  # e.g. "3(a)", "2.", "1 alt"
+        labels.append((int(m.group(1)), m.group(2), p, (min(r[2] for r in hdr) if hdr else y0) - 6, x, strong, bool(hdr)))
     labels.sort(key=lambda r: (r[2], r[3]))
+    # stray numbers from worked solutions: keep labels in the main label column, in question order
+    # label column = the 'Question' header's x on that page (carried forward to pages without one)
+    cols, col = {}, None
+    for p in range(len(doc)):
+        hdrs = [x for pp, x, y0, y1, s_, t in lns if pp == p and is_hdr(t, pp, y0)]
+        col = min(hdrs) if hdrs else col
+        cols[p] = col
+    labels = [l for l in labels if cols[l[2]] is not None and abs(l[4] - cols[l[2]]) < 28]
+    # a bare number is only a label if a header sits right above it or it lines up with real labels
+    strong_x = [l[4] for l in labels if l[5]]
+    anchor_x = strong_x + [l[4] for l in labels if l[6]]
+    labels = [l for l in labels if l[5] or l[6] or any(abs(l[4] - ax) < 1.5 for ax in anchor_x)]
+    kept, last = [], 0
+    for l in labels:
+        if l[0] in (last, last + 1) or (not kept and l[0] <= 3):
+            kept.append(l[:4])
+            last = l[0]
+    labels = kept
     last = (len(doc) - 1, bottom(len(doc) - 1))
     segs = {}
     for i, (q, letter, p, y) in enumerate(labels):
@@ -158,7 +188,8 @@ def main():
     items, stats = [], []
     for paper in manifest:
         try:
-            qp, ms = parse_qp(paper["qp"]), parse_ms(paper["ms"])
+            # Maths parts lean on set-up text printed between them, so keep whole questions
+            qp, ms = parse_qp(paper["qp"], split_parts=paper["subject"] != "Maths"), parse_ms(paper["ms"])
         except Exception as e:  # noqa: BLE001
             print("ERR", paper["qp"], e)
             continue
@@ -168,7 +199,8 @@ def main():
                 continue  # stems are shown with each part, not on their own
             ms_crops = ms.get((q, letter)) or (ms.get((q, None)) if letter is None else None)
             if not ms_crops and letter is None:  # MCQ/whole question marked by sub-labels
-                ms_crops = [c for (mq, ml), cs in sorted(ms.items(), key=lambda kv: str(kv[0][1])) if mq == q for c in cs]
+                ms_crops = sorted({tuple(c) for (mq, ml), cs in ms.items() if mq == q for c in cs}, key=lambda c: (c[0], c[2]))
+                ms_crops = [list(c) for c in ms_crops]
             if not crops or not ms_crops:
                 continue
             stem = qp.get((q, None), []) if letter else []

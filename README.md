@@ -1,6 +1,7 @@
 # IAL Question Drill
 
-Random past-paper questions from Edexcel IAL Chemistry U1–U4, Biology U1–U3 and Psychology U1–U2
+Random past-paper questions from Edexcel IAL Maths P3, P4, M1, M2, Physics U4, Chemistry U1–U4,
+Biology U1–U3 and Psychology U1–U2
 (sourced from Physics & Maths Tutor). Type an answer, reveal the mark scheme, rate yourself.
 
 Live site: https://khaledalseiari.github.io/ial-question-drill/
@@ -24,6 +25,7 @@ and the browser loads each paper directly from Physics & Maths Tutor.
     .venv/bin/python extract.py    # split into question parts -> data/questions.json
     .venv/bin/python topics.py     # tag topics (run after every extract.py)
 
-Questions are cut at the lettered-part level (e.g. Q3(a), with the Q3 stem shown above it) and
+Questions are cut at the lettered-part level (e.g. Q3(a), with the Q3 stem shown above it; Maths
+questions are kept whole because later parts rely on set-up text between parts) and
 displayed as crops of the original PDF via PDF.js, so diagrams, structures and tables stay intact.
 Two scanned Psychology papers (June 2019 U1/U2) have no text layer and are skipped.

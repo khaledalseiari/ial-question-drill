@@ -152,9 +152,13 @@ function rebuildDeck() {
 function buildFilters() {
   const bySubject = {};
   for (const q of all) (bySubject[q.subject] ??= new Map()).set(q.unit, (bySubject[q.subject].get(q.unit) || 0) + 1);
-  if (!enabled.size) for (const q of all) enabled.add(groupKey(q));
+  // switch on every unit this browser hasn't seen before (first visit, or units added since)
+  const known = new Set(store.get("knownUnits", store.get("enabled", []).length ? [...enabled] : []));
+  for (const q of all) if (!known.has(groupKey(q))) { enabled.add(groupKey(q)); known.add(groupKey(q)); }
+  store.set("knownUnits", [...known]);
+  store.set("enabled", [...enabled]);
   $("groups").innerHTML = "";
-  for (const subject of ["Chemistry", "Biology", "Psychology"]) {
+  for (const subject of ["Maths", "Physics", "Chemistry", "Biology", "Psychology"]) {
     if (!bySubject[subject]) continue;
     const g = document.createElement("div");
     g.className = "group";

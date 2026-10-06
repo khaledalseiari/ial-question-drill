@@ -63,7 +63,54 @@ PSY_U2 = {
     "Research methods & statistics": PSY_U1["Research methods & statistics"] + ", animal:3, animals:3, rat:2, lab experiment:3, observation:3, covert:3, overt:3, participant observation:4, tally:3, inter-rater:4, inter-observer:4, content analysis:4, case study:2, twin:2, scientific:2, objectivity:3, replicab:3, falsif:3",
 }
 
+PHY_U4 = {
+    "Momentum & collisions": "momentum:4, impulse:4, collision:4, collide:4, elastic:3, inelastic:4, conservation of momentum:5, recoil:3, kinetic energy:2, newton's second law:2, force-time:3",
+    "Circular motion": "circular:4, angular velocity:5, angular displacement:4, radian:3, centripetal:5, rotat:3, orbit:3, revolution:3, period:1, rad s:4",
+    "Electric fields": "electric field:5, field strength:3, field lines:3, coulomb's law:5, coulomb:3, point charge:4, equipotential:5, potential difference:2, electric potential:4, parallel plates:4, uniform field:3, charged sphere:4, permittivity:3",
+    "Capacitors": "capacitor:5, capacitance:5, discharg:4, time constant:5, farad:4, μf:4, exponential:3, rc:3, energy stored:3",
+    "Magnetic fields & induction": "magnetic field:4, magnetic flux:5, flux linkage:5, flux density:5, induced e.m.f:5, induced emf:5, induction:4, faraday:5, lenz:5, fleming:4, transformer:4, tesla:3, solenoid:3, coil:3, magnet:2, force on a current:4, cyclotron:4, generator:3, alternating:3",
+    "Particle physics": "quark:5, lepton:5, baryon:5, meson:5, hadron:5, antiparticle:5, annihilation:4, pair production:5, accelerator:4, linac:5, cyclotron:3, detector:4, bubble chamber:5, neutrino:4, pion:4, kaon:4, muon:4, electron volt:3, gev:4, mev:3, rutherford:4, alpha particle scattering:5, de broglie:4, standard model:5, charge conservation:3, baryon number:5, thermionic:3",
+}
+MATHS_P3 = {
+    "Algebra & functions": "function:3, inverse:3, composite:4, domain:4, range:4, modulus:4, |:1, f-1:4, fg:3, gf:3, algebraic fraction:4, simplify:2, transformation:3, sketch:2",
+    "Exponentials & logarithms": "e x:2, ln:4, log:4, exponential:4, logarithm:4, e^:3, growth:3, decay:3, half-life:3, y = ab:3",
+    "Trigonometry": "sec:4, cosec:4, cot:4, arcsin:4, arccos:4, arctan:4, sin:1, cos:1, tan:1, identity:3, r cos:5, r sin:5, double angle:4, compound angle:4, rcos:5, rsin:5, θ:1, degrees:1, radians:1",
+    "Differentiation": "differentiate:4, dy/dx:4, d y:3, chain rule:5, product rule:5, quotient rule:5, gradient:3, tangent:3, normal:3, stationary:4, turning point:4, rate of change:3, derivative:3",
+    "Integration": "integrate:4, integral:4, ∫:4, area:2, region:3, dx:2",
+    "Numerical methods": "iteration:5, iterative:5, root:3, x n:3, xn+1:5, interval:3, change of sign:5, newton-raphson:5, convergen:3, decimal places:2, sign change:5",
+}
+MATHS_P4 = {
+    "Partial fractions & binomial": "partial fraction:5, binomial expansion:5, binomial:4, expand:2, ascending powers:5, valid:3, |x|:4",
+    "Parametric equations": "parametric:5, parameter:4, cartesian equation:4, x = :1, y = :1",
+    "Implicit differentiation": "implicit:4, dy/dx:2, tangent:2, normal:2",
+    "Integration": "integrate:4, integral:4, integration by parts:5, by parts:5, substitution:4, volume:4, revolution:4, area:2, region:3, trapezium rule:5, exact value:2",
+    "Differential equations": "differential equation:5, dv/dt:4, dh/dt:4, dp/dt:4, dx/dt:3, rate:2, proportional:4, general solution:4, particular solution:4, separable:4",
+    "Vectors": "vector:4, line l:3, lines l:3, position vector:4, intersect:3, skew:5, scalar product:5, perpendicular:3, direction:2, i + :2, j + :2, k:1, acute angle:3",
+    "Proof": "proof by contradiction:5, contradiction:4, prove:2, irrational:4, rational:2",
+}
+MATHS_M1 = {
+    "Kinematics": "constant acceleration:4, speed-time:5, velocity-time:5, displacement:3, decelerat:4, accelerat:2, suvat:4, vertically upwards:4, projected vertically:5, greatest height:4, train:3, car:2, cyclist:3, runner:3, graph:2",
+    "Forces & equilibrium": "equilibrium:4, resolving:3, rough:3, smooth:2, friction:4, coefficient of friction:5, normal reaction:4, limiting:4, inclined plane:4, plane:2, tension:2, string:1, about to slip:5, about to move:5",
+    "Newton's laws & connected particles": "pulley:5, connected:4, light inextensible string:4, inextensible:3, lift:4, towbar:5, tow:4, car:2, trailer:4, newton's:2, accelerat:2, released from rest:3",
+    "Momentum & impulse": "momentum:5, impulse:5, collide:4, collision:4, coalesce:5, direction of motion:3, reversed:3, jerk:3",
+    "Moments": "moment:5, beam:5, rod:4, plank:5, pivot:4, support:4, non-uniform:4, uniform rod:4, centre of mass:3, tilt:4, about to tilt:5",
+    "Vectors in mechanics": "i and j:5, i + :3, j:2, position vector:4, velocity vector:4, bearing:3, due north:3, due east:3, resultant:3",
+}
+MATHS_M2 = {
+    "Projectiles": "projectile:5, projected:4, angle of projection:5, above the horizontal:4, horizontal ground:3, trajectory:4, time of flight:4, range:2",
+    "Work, energy & power": "work done:5, work-energy:5, kinetic energy:4, potential energy:4, power:4, kw:4, watts:4, w:1, resistance to motion:4, maximum speed:3, energy:2",
+    "Centres of mass": "centre of mass:5, lamina:5, uniform lamina:5, framework:4, hangs:3, suspended:4, freely suspended:5, equilibrium:2, folded:4, wire:3, toppl:4",
+    "Collisions (NEL)": "coefficient of restitution:5, restitution:5, newton's law:3, sphere:3, spheres:3, collide:3, collision:3, wall:3, rebound:4, impulse:3, momentum:3, loss of kinetic energy:4",
+    "Statics of rigid bodies": "ladder:5, rod:3, rough:2, hinge:4, hinged:4, wall:2, limiting equilibrium:5, friction:2, about to slip:4, rests:2, reaction:2",
+    "Kinematics with calculus": "variable acceleration:5, at time t seconds:3, t seconds:2, differentiat:4, integrat:4, dv/dt:4, velocity:2, v = :2, displacement:2, t 2:2, t2:2, comes to rest:3, instantaneous rest:5, s = :2",
+}
+
 TOPICS = {
+    ("Physics", "U4"): PHY_U4,
+    ("Maths", "P3"): MATHS_P3,
+    ("Maths", "P4"): MATHS_P4,
+    ("Maths", "M1"): MATHS_M1,
+    ("Maths", "M2"): MATHS_M2,
     ("Chemistry", "U1"): {k: CHEM_AS[k] for k in ["Moles & equations", "Atomic structure & periodic table", "Bonding & structure", "Alkanes, alkenes & polymers"]},
     ("Chemistry", "U2"): {k: CHEM_AS[k] for k in ["Energetics", "Intermolecular forces", "Redox", "Groups 1, 2 & 7", "Kinetics & equilibrium", "Alcohols & halogenoalkanes", "Mass spec & IR", "Moles & equations"]},
     ("Chemistry", "U3"): CHEM_AS,  # practical paper: draws on all of U1 + U2

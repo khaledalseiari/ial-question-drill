@@ -2,17 +2,23 @@
 import os, re, time, json, urllib.parse
 import requests
 
-BASE = "https://www.physicsandmathstutor.com/past-papers/"
+SITE = "https://www.physicsandmathstutor.com/"
+# (subject, unit) -> (PMT page, substring every kept PDF link must contain)
 UNITS = {
-    ("Chemistry", "U1"): "a-level-chemistry/edexcel-unit-1",
-    ("Chemistry", "U2"): "a-level-chemistry/edexcel-unit-2",
-    ("Chemistry", "U3"): "a-level-chemistry/edexcel-unit-3",
-    ("Chemistry", "U4"): "a-level-chemistry/edexcel-unit-4",
-    ("Biology", "U1"): "a-level-biology/edexcel-unit-1",
-    ("Biology", "U2"): "a-level-biology/edexcel-unit-2",
-    ("Biology", "U3"): "a-level-biology/edexcel-unit-3",
-    ("Psychology", "U1"): "a-level-psychology/edexcel-ial-paper-1",
-    ("Psychology", "U2"): "a-level-psychology/edexcel-ial-paper-2",
+    ("Chemistry", "U1"): ("past-papers/a-level-chemistry/edexcel-unit-1", "Edexcel-IAL/2018-spec/"),
+    ("Chemistry", "U2"): ("past-papers/a-level-chemistry/edexcel-unit-2", "Edexcel-IAL/2018-spec/"),
+    ("Chemistry", "U3"): ("past-papers/a-level-chemistry/edexcel-unit-3", "Edexcel-IAL/2018-spec/"),
+    ("Chemistry", "U4"): ("past-papers/a-level-chemistry/edexcel-unit-4", "Edexcel-IAL/2018-spec/"),
+    ("Biology", "U1"): ("past-papers/a-level-biology/edexcel-unit-1", "Edexcel-IAL/2018-spec/"),
+    ("Biology", "U2"): ("past-papers/a-level-biology/edexcel-unit-2", "Edexcel-IAL/2018-spec/"),
+    ("Biology", "U3"): ("past-papers/a-level-biology/edexcel-unit-3", "Edexcel-IAL/2018-spec/"),
+    ("Physics", "U4"): ("past-papers/a-level-physics/edexcel-unit-4", "Edexcel-IAL/2018-spec/"),
+    ("Psychology", "U1"): ("past-papers/a-level-psychology/edexcel-ial-paper-1", "Edexcel-IAL/"),
+    ("Psychology", "U2"): ("past-papers/a-level-psychology/edexcel-ial-paper-2", "Edexcel-IAL/"),
+    ("Maths", "P3"): ("a-level-maths-papers/c3-edexcel", "Edexcel-IAL/Pure/P3/"),
+    ("Maths", "P4"): ("a-level-maths-papers/c4-edexcel", "Edexcel-IAL/Pure/P4/"),
+    ("Maths", "M1"): ("a-level-maths-papers/m1-edexcel", "Edexcel-IAL/Mechanics/M1/"),
+    ("Maths", "M2"): ("a-level-maths-papers/m2-edexcel", "Edexcel-IAL/Mechanics/M2/"),
 }
 S = requests.Session()
 S.headers["User-Agent"] = "Mozilla/5.0 (personal revision tool)"
@@ -27,11 +33,11 @@ def key(url):
 
 def main():
     manifest = []
-    for (subject, unit), path in UNITS.items():
-        html = S.get(BASE + path + "/", timeout=30).text
+    for (subject, unit), (path, must) in UNITS.items():
+        html = S.get(SITE + path + "/", timeout=30).text
         links = sorted(set(re.findall(r'href="([^"]+\.pdf)"', html)))
-        # chem/bio pages also list the legacy spec; keep the IAL 2018 spec only
-        links = [l for l in links if "Edexcel-IAL" in l and ("2018-spec" in l or subject == "Psychology")]
+        # pages also list legacy / UK specs; keep only the IAL papers for this unit
+        links = [l for l in links if must in l]
         qps = {key(l): l for l in links if "/QP/" in l}
         mss = {key(l): l for l in links if "/MS/" in l}
         for sess in sorted((set(qps) & set(mss)) - {None}):
