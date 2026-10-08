@@ -105,6 +105,31 @@ MATHS_M2 = {
     "Kinematics with calculus": "variable acceleration:5, at time t seconds:3, t seconds:2, differentiat:4, integrat:4, dv/dt:4, velocity:2, v = :2, displacement:2, t 2:2, t2:2, comes to rest:3, instantaneous rest:5, s = :2",
 }
 
+MATHS_P1 = {
+    "Algebra & surds": "surd:5, rationalise:5, simplify:2, index:3, indices:4, expand:2, factorise:4, quadratic:3, completing the square:5, complete the square:5, discriminant:5, real roots:4, equal roots:4, b2 - 4ac:5, b 2 4ac:4",
+    "Equations & inequalities": "inequalit:5, simultaneous:5, set of values:5, solve:2, range of values:4, region:3, satisfies:2",
+    "Graphs & transformations": "sketch:4, asymptote:5, curve:2, transformation:4, translation:4, stretch:4, y = f(:4, f(x + :4, f(2x):4, intersect:3, cubic:4, reciprocal:3, crosses the:3",
+    "Coordinate geometry": "straight line:5, gradient:3, perpendicular:4, parallel:3, y = mx:4, ax + by + c:5, midpoint:4, line l:3, equation of the line:5, coordinates:2",
+    "Trigonometry & radians": "sine rule:5, cosine rule:5, radian:4, arc length:5, sector:5, segment:4, area of triangle:4, triangle:2, sin:1, cos:1, tan:1",
+    "Differentiation": "differentiate:4, dy/dx:4, gradient of the tangent:4, tangent:3, normal:3, f'(x):4, f (x):1, derivative:3",
+    "Integration": "integrate:4, integral:4, find f(x):3, ∫:4, dx:2",
+}
+MATHS_P2 = {
+    "Proof & algebraic division": "proof:4, prove:3, factor theorem:5, remainder theorem:5, remainder:4, algebraic division:5, divide:2, factor:3, f(x) = 2x3:2",
+    "Coordinate geometry of circles": "circle:5, centre:4, radius:4, tangent to the circle:5, chord:4, diameter:3",
+    "Binomial expansion": "binomial:5, expansion:4, ascending powers:5, coefficient:4, term in x:4, nc:3",
+    "Sequences & series": "arithmetic:5, geometric:5, series:4, sequence:4, sum to infinity:5, common ratio:5, common difference:5, nth term:4, sum of the first:5, recurrence:5, u n:3, un:2, Σ:4",
+    "Exponentials & logarithms": "log:5, ln:3, logarithm:5, exponential:4, a x:2, solve 2:2",
+    "Trigonometry": "trigonometric:3, identity:4, tan θ:3, sin θ:3, cos θ:3, sin 2:2, 0 ≤ θ:4, 0 θ:3, sin:1, cos:1, tan:1, radian:2",
+    "Differentiation & integration": "stationary:4, maximum:3, minimum:3, increasing:4, decreasing:4, second derivative:5, d2y:5, integrate:4, area:3, region:4, trapezium rule:5, definite integral:4",
+}
+MATHS_S1 = {
+    "Data representation & summary": "mean:3, median:4, quartile:5, interquartile:5, standard deviation:4, variance:3, box plot:5, histogram:5, stem and leaf:5, outlier:5, skew:5, frequency density:5, interpolation:5, coding:5, coded:5, Σx:3, sx:2",
+    "Probability": "probability:3, venn diagram:5, independent:4, mutually exclusive:5, tree diagram:5, conditional:5, given that:3, p(a:4, p(b:4, p(a ∩:5, p(a ∪:5",
+    "Correlation & regression": "correlation:5, product moment:5, regression:5, regression line:5, sxx:5, sxy:5, syy:5, explanatory:5, response variable:5, extrapolation:5, interpolate:3, y = a + bx:5",
+    "Discrete random variables": "random variable:4, discrete:4, probability distribution:5, e(x):5, var(x):5, e(x2):5, cumulative distribution:5, f(x):1, discrete uniform:5, e(2x:4",
+    "Normal distribution": "normal distribution:5, n(:3, ~ n:4, z:2, standard normal:5, percentage points:4, φ:3, μ:3, σ:3, upper quartile:2",
+}
 PHY_U1 = {
     "Motion & kinematics": "velocity:3, acceleration:3, displacement:3, speed:2, velocity-time:5, displacement-time:5, suvat:4, free fall:4, projectile:5, horizontally:3, vertically:2, scalar:4, vector:3, resolve:3, component:3, terminal velocity:2",
     "Forces & Newton's laws": "newton's first:5, newton's second:5, newton's third:5, free-body:5, free body:5, resultant force:4, weight:2, normal contact:4, tension:3, friction:2, drag:3, equilibrium:3, moment:4, centre of gravity:4, principle of moments:5, torque:4, couple:3",
@@ -130,6 +155,9 @@ TOPICS = {
     ("Physics", "U2"): PHY_U2,
     ("Physics", "U3"): {**PHY_U1, **PHY_U2, **PHY_PRACTICAL},  # practical paper: draws on U1 + U2
     ("Physics", "U4"): PHY_U4,
+    ("Maths", "P1"): MATHS_P1,
+    ("Maths", "P2"): MATHS_P2,
+    ("Maths", "S1"): MATHS_S1,
     ("Maths", "P3"): MATHS_P3,
     ("Maths", "P4"): MATHS_P4,
     ("Maths", "M1"): MATHS_M1,

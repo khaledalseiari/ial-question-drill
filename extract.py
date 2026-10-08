@@ -16,6 +16,7 @@ END_RE = re.compile(r"^\(Total for Question|^\(Total \d+ marks?\)|^TOTAL FOR (SE
 DOTS = re.compile(r"^(\d\s*)?[._\u2026 ]{8,}$")
 # lines that carry no question content (answer-space pages in Maths papers)
 FILLER = re.compile(r"^Question \d+ continued|^\(Total for Question|^\(Total \d+ marks?\)|^DO NOT WRITE|^\(?\d+\)?$|^Leave\b|^blank$|^Q\d+$|^Turn over")
+MS_PREFIX_RE = re.compile(r"^(\d{1,2})\.?\s*\(([a-h])\)(?:\s*\([ivx]+\))*\s+\S")
 MS_LABEL_RE = re.compile(r"^(\d{1,2})\.?\s*(?:\(?([a-h])\)?)?(?:\s*\(?([ivx]+)\)?)*\s*(?:[Aa]lt\w*\.?\s*\d*)?$")
 
 
@@ -147,7 +148,8 @@ def parse_ms(path):
         if y0 < 30:
             continue
         compact = t.replace(" ", "")
-        m = MS_LABEL_RE.match(t) or MS_LABEL_RE.match(compact)
+        # S1-style schemes run the label into the answer text: "1.(a) B and C ..."
+        m = MS_LABEL_RE.match(t) or MS_LABEL_RE.match(compact) or MS_PREFIX_RE.match(t)
         if not m:
             continue
         # must sit in the 'Question Number' column; include the header row when it is directly above

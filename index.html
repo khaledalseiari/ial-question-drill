@@ -54,20 +54,46 @@
   .loading { color: var(--muted); padding: 24px; text-align: center; }
   kbd { font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--muted); }
   .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .tabs { display: flex; gap: 4px; }
+  .tabs button { padding: 5px 12px; font-size: 14px; border-color: transparent; background: transparent; color: var(--muted); }
+  .tabs button.on { background: var(--panel); border-color: var(--line); color: var(--ink); font-weight: 600; }
+  .seen { font-size: 13px; color: var(--muted); margin: -4px 0 10px; }
+  .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
+  .badge.r2 { color: var(--good); } .badge.r1 { color: var(--mid); } .badge.r0 { color: var(--bad); }
+  .hist-bar { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .hist-bar .spacer { flex: 1; }
+  .hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .hist li { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+             display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; }
+  .hist .when { color: var(--muted); font-size: 12px; }
+  .hist .what { font-weight: 600; }
+  .hist .ans { grid-column: 1 / -1; color: var(--muted); font-size: 13px; white-space: pre-wrap;
+               overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .hist .go { display: flex; gap: 8px; align-items: center; }
+  .hist button { padding: 5px 12px; font-size: 13px; }
+  .empty { color: var(--muted); text-align: center; padding: 32px 0; }
+  .toggle { display: inline-flex; gap: 6px; align-items: center; margin-top: 12px; cursor: pointer; }
 </style>
 </head>
 <body>
 <header><div class="bar">
   <h1>IAL Question Drill</h1>
+  <nav class="tabs">
+    <button id="tab-practice" class="on">Practice</button>
+    <button id="tab-history">History</button>
+  </nav>
   <span class="score" id="score"></span>
 </div></header>
 <main>
+ <div id="practice">
   <details class="filters" id="filters">
     <summary>Subjects, units &amp; topics <span id="pool" style="font-weight:400;color:var(--muted)"></span></summary>
     <div class="groups" id="groups"></div>
+    <label class="toggle"><input type="checkbox" id="hide-done"> Skip questions I've already done</label>
   </details>
 
   <div class="meta" id="meta"></div>
+  <div class="seen hidden" id="seen"></div>
   <div class="sheet" id="question"><div class="loading">Loading questions…</div></div>
 
   <div class="label">Your answer</div>
@@ -88,12 +114,30 @@
       <button class="mid" data-r="1">Partly</button>
       <button class="bad" data-r="0">Missed it</button>
     </div>
-    <p class="hint">Rating moves you on to the next random question. <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> also work.</p>
+    <p class="hint">Rating saves this attempt to your History and moves you on. <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> also work.</p>
   </section>
+ </div>
+
+ <section id="history" class="hidden">
+  <div class="hist-bar" id="hist-filters"></div>
+  <ul class="hist" id="hist-list"></ul>
+  <p class="hint">History is saved in this browser only. Clearing site data or switching device starts it fresh.</p>
+ </section>
   <p class="hint" style="margin-top:40px">Questions and mark schemes are © Pearson Edexcel. Papers load directly from
   <a href="https://www.physicsandmathstutor.com/" style="color:inherit">Physics &amp; Maths Tutor</a>; this site stores only page positions and topic tags.</p>
 </main>
 
+<script>
+// Visitor analytics via GoatCounter (cookie-free). Set your site code to switch it on, e.g. "ialdrill".
+const GOATCOUNTER_CODE = "";
+if (GOATCOUNTER_CODE && location.hostname.endsWith("github.io")) {
+  const gc = document.createElement("script");
+  gc.async = true;
+  gc.src = "https://gc.zgo.at/count.js";
+  gc.dataset.goatcounter = `https://${GOATCOUNTER_CODE}.goatcounter.com/count`;
+  document.head.appendChild(gc);
+}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -108,6 +152,13 @@ let all = [], deck = [], current = null;
 let enabled = new Set(store.get("enabled", []));
 let offTopics = new Set(store.get("offTopics", []));  // "Subject|Topic" the user switched off
 const stats = store.get("stats", { done: 0, got: 0, partly: 0, missed: 0 });
+// every rated attempt, oldest first: { id, t: timestamp, r: 0 missed / 1 partly / 2 got, a: typed answer }
+let history = store.get("history", []);
+let hideDone = store.get("hideDone", false);
+let histFilter = "all";
+const RATING = ["Missed it", "Partly", "Got it"];
+const byId = new Map();
+const lastAttempt = id => { for (let i = history.length - 1; i >= 0; i--) if (history[i].id === id) return history[i]; };
 
 // ---- PDF rendering -------------------------------------------------------
 const docs = new Map();
@@ -145,7 +196,8 @@ function shuffle(a) {
 }
 
 function rebuildDeck() {
-  deck = shuffle(all.filter(inPool));
+  const done = hideDone ? new Set(history.map(h => h.id)) : null;
+  deck = shuffle(all.filter(q => inPool(q) && !(done && done.has(q.id))));
   $("pool").textContent = `· ${deck.length.toLocaleString()} questions in pool`;
 }
 
@@ -222,22 +274,42 @@ function saveTopics(subject, el) {
   if (!current || !inPool(current)) next();
 }
 
+function fmtDate(t) {
+  return new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
 function renderScore() {
   const pct = stats.done ? Math.round((stats.got + stats.partly / 2) / stats.done * 100) : 0;
   $("score").textContent = stats.done ? `${stats.done} answered · ${pct}%` : "";
+  $("tab-history").textContent = history.length ? `History (${history.length})` : "History";
 }
 
 let token = 0;
-async function next() {
-  const my = ++token;
+function next() {
   if (!deck.length) rebuildDeck();
-  current = deck.pop();
+  return show(deck.pop());
+}
+
+async function show(q) {
+  const my = ++token;
+  current = q;
   $("answer").value = "";
   $("result").classList.add("hidden");
   $("reveal").disabled = false;
   $("question").innerHTML = "";
   $("ms").innerHTML = "";
-  if (!current) { $("question").innerHTML = `<div class="loading">Nothing matches — pick at least one unit and topic above.</div>`; $("meta").innerHTML = ""; return; }
+  $("seen").classList.add("hidden");
+  if (!current) {
+    $("question").innerHTML = `<div class="loading">${hideDone ? "You've done every question in this selection — untick “Skip questions I've already done” or pick more units/topics." : "Nothing matches — pick at least one unit and topic above."}</div>`;
+    $("meta").innerHTML = "";
+    return;
+  }
+  const prev = lastAttempt(current.id);
+  if (prev) {
+    const n = history.filter(h => h.id === current.id).length;
+    $("seen").innerHTML = `Done ${n > 1 ? n + " times" : "before"} · last on ${fmtDate(prev.t)} · <span class="badge r${prev.r}">${RATING[prev.r]}</span>`;
+    $("seen").classList.remove("hidden");
+  }
   $("meta").innerHTML = `<span class="tag">${current.subject} ${current.unit}</span>
     <span>${current.session} · ${current.label} · ${current.topics.join(", ")}</span>
     <a href="${current.qp}" target="_blank" rel="noopener">full paper</a>`;
@@ -266,20 +338,99 @@ function rate(r) {
   stats.done++;
   stats[["missed", "partly", "got"][r]]++;
   store.set("stats", stats);
+  history.push({ id: current.id, t: Date.now(), r, a: $("answer").value.trim().slice(0, 4000) });
+  if (history.length > 5000) history = history.slice(-5000);
+  store.set("history", history);
   renderScore();
   next();
 }
+
+// ---- History ---------------------------------------------------------------
+function setTab(name) {
+  $("practice").classList.toggle("hidden", name !== "practice");
+  $("history").classList.toggle("hidden", name !== "history");
+  $("tab-practice").classList.toggle("on", name === "practice");
+  $("tab-history").classList.toggle("on", name === "history");
+  if (name === "history") renderHistory();
+  window.scrollTo({ top: 0 });
+}
+
+function renderHistory() {
+  const counts = [0, 0, 0];
+  for (const h of history) counts[h.r]++;
+  const opts = [["all", `All · ${history.length}`], ["0", `Missed · ${counts[0]}`], ["1", `Partly · ${counts[1]}`], ["2", `Got it · ${counts[2]}`],
+                ["latest-missed", "Still not got"]];
+  const bar = $("hist-filters");
+  bar.innerHTML = "";
+  for (const [k, label] of opts) {
+    const b = document.createElement("button");
+    b.className = "chip" + (histFilter === k ? " on" : "");
+    b.textContent = label;
+    b.title = k === "latest-missed" ? "Questions whose most recent attempt was Missed or Partly" : "";
+    b.onclick = () => { histFilter = k; renderHistory(); };
+    bar.appendChild(b);
+  }
+  const spacer = document.createElement("span");
+  spacer.className = "spacer";
+  bar.appendChild(spacer);
+
+  let rows = history.map((h, i) => ({ ...h, i })).reverse();
+  if (histFilter === "latest-missed") {
+    const seen = new Set();
+    rows = rows.filter(h => !seen.has(h.id) && seen.add(h.id) && h.r < 2);
+  } else if (histFilter !== "all") rows = rows.filter(h => h.r === +histFilter);
+  rows = rows.filter(h => byId.has(h.id));
+
+  if (rows.length) {
+    const drill = document.createElement("button");
+    drill.className = "primary";
+    drill.textContent = `Redo these ${rows.length > 1 ? rows.length + " " : ""}in random order`;
+    drill.onclick = () => {
+      deck = shuffle([...new Map(rows.map(h => [h.id, byId.get(h.id)])).values()]);
+      $("pool").textContent = `· revisiting ${deck.length} from History`;
+      setTab("practice");
+      next();
+    };
+    bar.appendChild(drill);
+  }
+
+  const list = $("hist-list");
+  list.innerHTML = "";
+  if (!rows.length) {
+    list.innerHTML = `<li class="empty" style="display:block">${history.length ? "Nothing here with this filter." : "No attempts yet. Rate a question after checking the mark scheme and it will show up here."}</li>`;
+    return;
+  }
+  for (const h of rows.slice(0, 500)) {
+    const q = byId.get(h.id);
+    const li = document.createElement("li");
+    li.innerHTML = `<div><div class="what"></div><div class="when"></div></div>
+      <div class="go"><span class="badge r${h.r}">${RATING[h.r]}</span><button>Revisit</button></div>
+      <div class="ans"></div>`;
+    li.querySelector(".what").textContent = `${q.subject} ${q.unit} · ${q.session} · ${q.label}`;
+    li.querySelector(".when").textContent = `${fmtDate(h.t)} · ${q.topics.join(", ")}`;
+    li.querySelector(".ans").textContent = h.a ? `Your answer: ${h.a}` : "(no answer typed)";
+    li.querySelector("button").onclick = () => { setTab("practice"); show(q); };
+    list.appendChild(li);
+  }
+  if (rows.length > 500) list.insertAdjacentHTML("beforeend", `<li class="empty" style="display:block">Showing the latest 500.</li>`);
+}
+
+$("tab-practice").onclick = () => setTab("practice");
+$("tab-history").onclick = () => setTab("history");
+$("hide-done").checked = hideDone;
+$("hide-done").onchange = e => { hideDone = e.target.checked; store.set("hideDone", hideDone); rebuildDeck(); if (current && hideDone && lastAttempt(current.id)) next(); };
 
 $("reveal").onclick = reveal;
 $("skip").onclick = next;
 document.querySelectorAll("[data-r]").forEach(b => b.onclick = () => rate(+b.dataset.r));
 document.addEventListener("keydown", e => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); reveal(); }
-  else if (document.activeElement !== $("answer") && ["1", "2", "3"].includes(e.key)) rate(3 - +e.key);
+  else if (document.activeElement !== $("answer") && !$("practice").classList.contains("hidden") && ["1", "2", "3"].includes(e.key)) rate(3 - +e.key);
 });
 
 fetch("data/questions.json").then(r => r.json()).then(data => {
   all = data;
+  for (const q of all) byId.set(q.id, q);
   buildFilters();
   rebuildDeck();
   renderScore();
