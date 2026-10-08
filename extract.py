@@ -155,7 +155,7 @@ def parse_ms(path):
         # must sit in the 'Question Number' column; include the header row when it is directly above
         if not any(abs(hx_ - x) < 40 for hx_ in hx):
             continue
-        hdr = [r for r in lns if r[0] == p and is_hdr(r[5], r[0], r[2]) and 0 < y0 - r[2] < 60 and abs(r[1] - x) < 40]
+        hdr = [r for r in lns if r[0] == p and is_hdr(r[5], r[0], r[2]) and 0 < y0 - r[2] < 100 and abs(r[1] - x) < 40]
         strong = bool(m.group(2)) or not t.strip().isdigit()  # e.g. "3(a)", "2.", "1 alt"
         labels.append((int(m.group(1)), m.group(2), p, (min(r[2] for r in hdr) if hdr else y0) - 6, x, y0, strong, bool(hdr)))
     labels.sort(key=lambda r: (r[2], r[3]))
@@ -195,6 +195,25 @@ def parse_ms(path):
     return segs
 
 
+def insert_pages(path):
+    """Source-booklet pages (Economics extracts) that PMT appends after the end of the paper."""
+    doc = pymupdf.open(path)
+    end, crops = None, []
+    for i, page in enumerate(doc):
+        t = page.get_text()
+        if "TOTAL FOR PAPER" in t:
+            end = i
+        elif end is not None and re.search(r"\bExtract [A-H]\b|\bFigure \d", t):
+            w, h = page.rect.width, page.rect.height
+            crops.append([i, 20, 36, round(w - 20, 1), round(h - 40, 1)])
+    return crops
+
+
+def crop_text(path, crops):
+    doc = pymupdf.open(path)
+    return " ".join(doc[p].get_text("text", clip=pymupdf.Rect(x0, y0, x1, y1)) for p, x0, y0, x1, y1 in crops)
+
+
 def main():
     manifest = json.load(open("pdfs/manifest.json"))
     items, stats = [], []
@@ -202,6 +221,7 @@ def main():
         try:
             # Maths parts lean on set-up text printed between them, so keep whole questions
             qp, ms = parse_qp(paper["qp"], split_parts=paper["subject"] != "Maths"), parse_ms(paper["ms"])
+            inserts = insert_pages(paper["qp"]) if paper["subject"] == "Economics" else []
         except Exception as e:  # noqa: BLE001
             print("ERR", paper["qp"], e)
             continue
@@ -216,13 +236,15 @@ def main():
             if not crops or not ms_crops:
                 continue
             stem = qp.get((q, None), []) if letter else []
+            # questions that point at the source booklet get its pages as extra context
+            ctx = inserts if inserts and re.search(r"\bExtract\b|\bFigure\b", crop_text(paper["qp"], stem + crops)) else []
             items.append({
                 "id": f"{paper['subject'][:3]}-{paper['unit']}-{paper['session'].replace(' ', '')}-{q}{letter or ''}",
                 "subject": paper["subject"], "unit": paper["unit"], "session": paper["session"],
                 "label": f"Q{q}" + (f"({letter})" if letter else ""),
                 "qp": paper["qp_url"], "ms": paper["ms_url"],
                 "qp_file": paper["qp"], "ms_file": paper["ms"],
-                "stem": stem, "q": crops, "a": ms_crops,
+                "stem": stem, "q": crops, "a": ms_crops, **({"ctx": ctx} if ctx else {}),
             })
             matched += 1
         parts = sum(1 for (q, l) in qp if not (l is None and (q, "a") in qp))

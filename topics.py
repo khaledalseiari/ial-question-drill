@@ -105,6 +105,35 @@ MATHS_M2 = {
     "Kinematics with calculus": "variable acceleration:5, at time t seconds:3, t seconds:2, differentiat:4, integrat:4, dv/dt:4, velocity:2, v = :2, displacement:2, t 2:2, t2:2, comes to rest:3, instantaneous rest:5, s = :2",
 }
 
+ECON_U1 = {
+    "Demand, supply & price": "demand:3, supply:3, equilibrium price:5, price mechanism:5, shift:3, excess demand:5, excess supply:5, rationing:4, signalling:4, incentive:3, market:1, complements:4, substitutes:4, derived demand:5, joint demand:5",
+    "Elasticities": "elasticity:5, elastic:4, inelastic:4, ped:5, pes:5, yed:5, xed:5, cross elasticity:5, income elasticity:5, price elasticity:5, total revenue:3",
+    "Consumer & producer surplus": "consumer surplus:5, producer surplus:5, indirect tax:4, subsidy:4, incidence:5, tax burden:5, specific tax:5, ad valorem:5",
+    "Market failure & externalities": "market failure:5, externalit:5, negative externality:5, positive externality:5, social cost:5, social benefit:5, private cost:4, merit good:5, demerit good:5, public good:5, free rider:5, non-excludable:5, non-rival:5, information gap:5, asymmetric information:5, welfare loss:4",
+    "Government intervention": "government intervention:5, government failure:5, maximum price:5, minimum price:5, price ceiling:5, price floor:5, buffer stock:5, tradable pollution permit:5, pollution permit:5, regulation:4, state provision:5, information provision:4, tax:2, subsidy:2",
+    "Economic problem & specialisation": "scarcity:5, opportunity cost:5, production possibility:5, ppf:5, ppc:5, specialisation:5, division of labour:5, free market economy:5, mixed economy:5, command economy:5, rational:3, behavioural:4, money:2, positive statement:5, normative:5",
+}
+ECON_U2 = {
+    "Measuring the economy": "gdp:4, real gdp:5, nominal:4, gdp per capita:5, gni:4, hdi:5, human development:5, inflation:3, cpi:5, rpi:4, deflation:4, unemployment:3, claimant count:5, ilo:4, labour force survey:5, balance of payments:3, current account:4, national happiness:5, well-being:4",
+    "Aggregate demand & supply": "aggregate demand:5, aggregate supply:5, ad:3, sras:5, lras:5, consumption:3, investment:3, government spending:3, net exports:4, multiplier:5, marginal propensity:5, accelerator:5, keynesian:5, classical:4, output gap:5, wealth effect:4, savings:3",
+    "Growth, inflation & unemployment": "economic growth:5, actual growth:4, potential growth:5, trade cycle:5, business cycle:5, recession:4, boom:3, demand-pull:5, cost-push:5, cyclical unemployment:5, structural unemployment:5, frictional:5, phillips curve:5, trade-off:4, conflict:2",
+    "Macroeconomic policy": "fiscal policy:5, monetary policy:5, interest rate:4, quantitative easing:5, central bank:4, budget deficit:5, national debt:5, supply-side polic:5, supply side polic:5, taxation:3, government expenditure:4, exchange rate:2, macroeconomic objective:5, policy:1",
+}
+ECON_U3 = {
+    "Firm objectives, size & growth": "profit maximisation:5, revenue maximisation:5, sales maximisation:5, satisficing:5, principal-agent:5, principal agent:5, organic growth:5, integration:5, horizontal integration:5, vertical integration:5, conglomerate:5, merger:5, takeover:5, demerger:5, economies of scale:4, public sector:3, private sector:3, not-for-profit:5",
+    "Costs, revenue & profit": "average cost:5, marginal cost:5, fixed cost:5, variable cost:5, total cost:4, marginal revenue:5, average revenue:5, total revenue:4, normal profit:5, supernormal profit:5, losses:3, shut down:5, diseconomies:5, economies of scale:4, minimum efficient scale:5, short run:3, long run:3",
+    "Market structures": "perfect competition:5, monopoly:5, monopolistic competition:5, oligopoly:5, duopoly:5, monopsony:5, concentration ratio:5, game theory:5, payoff:5, collusion:5, cartel:5, price war:5, kinked demand:5, barriers to entry:5, contestable:5, sunk cost:5, price discrimination:5, allocative efficiency:5, productive efficiency:5, dynamic efficiency:5, x-inefficiency:5",
+    "Labour market": "labour market:5, wage:4, demand for labour:5, supply of labour:5, minimum wage:5, trade union:5, marginal revenue product:5, labour mobility:5, occupational:4, geographical:4, migration:3",
+    "Competition policy & regulation": "competition policy:5, competition authority:5, regulation:4, regulatory capture:5, price cap:5, rpi - x:5, privatisation:5, nationalisation:5, deregulation:5, contracting out:5, competitive tendering:5",
+}
+ECON_U4 = {
+    "Globalisation & trade": "globalisation:5, comparative advantage:5, absolute advantage:5, terms of trade:5, trading bloc:5, free trade area:5, customs union:5, common market:5, monetary union:5, wto:5, protectionism:5, tariff:5, quota:4, dumping:5, trade creation:5, trade diversion:5, export:2, import:2, multinational:4, transnational:4",
+    "Balance of payments & exchange rates": "balance of payments:5, current account:5, financial account:5, capital account:5, exchange rate:5, appreciation:5, depreciation:5, devaluation:5, revaluation:5, floating:5, fixed exchange:5, competitiveness:4, marshall-lerner:5, j-curve:5, j curve:5, unit labour cost:5",
+    "Poverty & inequality": "poverty:5, absolute poverty:5, relative poverty:5, inequality:5, gini:5, lorenz:5, income distribution:5, wealth:3, redistribution:5, progressive tax:5",
+    "Public finance & macro policy": "public expenditure:5, public finance:5, fiscal deficit:5, budget deficit:5, national debt:5, progressive:3, regressive:4, proportional tax:5, laffer:5, fiscal policy:4, austerity:5, crowding out:5, sovereign debt:5, fiscal rule:5, macroeconomic polic:4",
+    "Growth & development": "economic development:5, development:3, hdi:5, primary product:5, commodit:4, foreign direct investment:5, fdi:5, aid:4, debt relief:5, microfinance:5, fair trade:5, industrialisation:5, tourism:4, corruption:4, infrastructure:3, savings gap:5, harrod-domar:5, emerging econom:5, developing countr:4, brics:5",
+    "Financial sector & role of the state": "financial market:5, bank:3, commercial bank:5, central bank:5, lender of last resort:5, money market:5, capital market:5, market bubble:5, moral hazard:5, speculation:5, systemic risk:5, regulation:3, liquidity:4, capital ratio:5, credit:3",
+}
 MATHS_P1 = {
     "Algebra & surds": "surd:5, rationalise:5, simplify:2, index:3, indices:4, expand:2, factorise:4, quadratic:3, completing the square:5, complete the square:5, discriminant:5, real roots:4, equal roots:4, b2 - 4ac:5, b 2 4ac:4",
     "Equations & inequalities": "inequalit:5, simultaneous:5, set of values:5, solve:2, range of values:4, region:3, satisfies:2",
@@ -151,6 +180,10 @@ PHY_PRACTICAL = {
 }
 
 TOPICS = {
+    ("Economics", "U1"): ECON_U1,
+    ("Economics", "U2"): ECON_U2,
+    ("Economics", "U3"): ECON_U3,
+    ("Economics", "U4"): ECON_U4,
     ("Physics", "U1"): PHY_U1,
     ("Physics", "U2"): PHY_U2,
     ("Physics", "U3"): {**PHY_U1, **PHY_U2, **PHY_PRACTICAL},  # practical paper: draws on U1 + U2

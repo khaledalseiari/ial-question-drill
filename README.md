@@ -1,7 +1,7 @@
 # IAL Question Drill
 
 Random past-paper questions from Edexcel IAL Maths P1–P4, M1, M2, S1, Physics U1–U4, Chemistry U1–U4,
-Biology U1–U3 and Psychology U1–U2
+Biology U1–U3, Economics U1–U4 and Psychology U1–U2
 (sourced from Physics & Maths Tutor). Type an answer, reveal the mark scheme, rate yourself.
 
 Live site: https://khaledalseiari.github.io/ial-question-drill/
