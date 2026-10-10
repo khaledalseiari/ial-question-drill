@@ -6,7 +6,8 @@ Biology U1–U3, Economics U1–U4 and Psychology U1–U2
 
 Live site: https://khaledalseiari.github.io/ial-question-drill/
 
-Filter by subject, unit and topic. Every rated attempt (with your typed answer) is logged in the
+Filter by subject, unit, topic and marks; Chemistry and Physics also have a "Calculations only"
+mode for drilling calculation questions unit by unit. Every rated attempt (with your typed answer) is logged in the
 History tab in your browser, so you can revisit questions or redo the ones you missed. Topics are tagged automatically by keyword matching
 (`topics.py`), so the odd question may land in the wrong topic or in "Other".
 

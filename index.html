@@ -92,6 +92,7 @@
   <details class="filters" id="filters">
     <summary>Subjects, units &amp; topics <span id="pool" style="font-weight:400;color:var(--muted)"></span></summary>
     <div class="groups" id="groups"></div>
+    <div class="group" style="margin-top:14px"><h3>Marks</h3><div class="topics" id="marks-row"></div></div>
     <label class="toggle"><input type="checkbox" id="hide-done"> Skip questions I've already done</label>
   </details>
 
@@ -155,6 +156,11 @@ const store = {
 let all = [], deck = [], current = null;
 let enabled = new Set(store.get("enabled", []));
 let offTopics = new Set(store.get("offTopics", []));  // "Subject|Topic" the user switched off
+let offMarks = new Set(store.get("offMarks", []));    // mark buckets switched off
+let calcOnly = new Set(store.get("calcOnly", []));    // subjects limited to calculation questions
+const CALC_SUBJECTS = ["Chemistry", "Physics"];
+const MARK_BUCKETS = [["1", 1, 1], ["2", 2, 2], ["3", 3, 3], ["4–5", 4, 5], ["6–8", 6, 8], ["9–12", 9, 12], ["13+", 13, 99]];
+const bucketOf = q => q.marks ? MARK_BUCKETS.find(([, lo, hi]) => q.marks >= lo && q.marks <= hi)[0] : "?";
 const stats = store.get("stats", { done: 0, got: 0, partly: 0, missed: 0 });
 // every rated attempt, oldest first: { id, t: timestamp, r: 0 missed / 1 partly / 2 got, a: typed answer }
 let history = store.get("history", []);
@@ -192,7 +198,9 @@ async function renderCrops(container, path, crops) {
 // ---- Deck ----------------------------------------------------------------
 const groupKey = q => `${q.subject} ${q.unit}`;
 const topicKey = (subject, t) => `${subject}|${t}`;
-const inPool = q => enabled.has(groupKey(q)) && q.topics.some(t => !offTopics.has(topicKey(q.subject, t)));
+const calcOk = q => !calcOnly.has(q.subject) || q.calc;
+const inPool = q => enabled.has(groupKey(q)) && calcOk(q) && !offMarks.has(bucketOf(q))
+  && q.topics.some(t => !offTopics.has(topicKey(q.subject, t)));
 
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -207,7 +215,10 @@ function rebuildDeck() {
 
 function buildFilters() {
   const bySubject = {};
-  for (const q of all) (bySubject[q.subject] ??= new Map()).set(q.unit, (bySubject[q.subject].get(q.unit) || 0) + 1);
+  for (const q of all) {
+    const m = (bySubject[q.subject] ??= new Map());
+    m.set(q.unit, (m.get(q.unit) || 0) + (calcOk(q) ? 1 : 0));
+  }
   // switch on every unit this browser hasn't seen before (first visit, or units added since)
   const known = new Set(store.get("knownUnits", store.get("enabled", []).length ? [...enabled] : []));
   for (const q of all) if (!known.has(groupKey(q))) { enabled.add(groupKey(q)); known.add(groupKey(q)); }
@@ -219,6 +230,21 @@ function buildFilters() {
     const g = document.createElement("div");
     g.className = "group";
     g.innerHTML = `<h3>${subject}</h3>`;
+    if (CALC_SUBJECTS.includes(subject)) {
+      const c = document.createElement("label");
+      c.className = "toggle";
+      c.style.margin = "0 0 6px";
+      c.innerHTML = `<input type="checkbox" ${calcOnly.has(subject) ? "checked" : ""}> Calculations only`;
+      c.querySelector("input").onchange = e => {
+        e.target.checked ? calcOnly.add(subject) : calcOnly.delete(subject);
+        store.set("calcOnly", [...calcOnly]);
+        buildFilters();
+        rebuildDeck();
+        if (!current || !inPool(current)) next();
+      };
+      g.appendChild(c);
+      g.appendChild(document.createElement("br"));
+    }
     for (const [unit, n] of [...bySubject[subject]].sort()) {
       const k = `${subject} ${unit}`;
       const l = document.createElement("label");
@@ -227,6 +253,7 @@ function buildFilters() {
         e.target.checked ? enabled.add(k) : enabled.delete(k);
         store.set("enabled", [...enabled]);
         renderTopics(subject, g.querySelector(".topics"));
+        renderMarks();
         rebuildDeck();
         next();
       };
@@ -238,12 +265,13 @@ function buildFilters() {
     renderTopics(subject, tl);
     $("groups").appendChild(g);
   }
+  renderMarks();
 }
 
 function renderTopics(subject, el) {
   const counts = new Map();
   for (const q of all) {
-    if (q.subject !== subject || !enabled.has(groupKey(q))) continue;
+    if (q.subject !== subject || !enabled.has(groupKey(q)) || !calcOk(q)) continue;
     for (const t of q.topics) counts.set(t, (counts.get(t) || 0) + 1);
   }
   const names = [...counts.keys()].sort((a, b) => (a === "Other") - (b === "Other") || a.localeCompare(b));
@@ -269,6 +297,36 @@ function renderTopics(subject, el) {
     b.onclick = () => { offTopics.has(k) ? offTopics.delete(k) : offTopics.add(k); saveTopics(subject, el); };
     el.appendChild(b);
   }
+}
+
+function renderMarks() {
+  const counts = new Map();
+  for (const q of all) if (enabled.has(groupKey(q)) && calcOk(q)) counts.set(bucketOf(q), (counts.get(bucketOf(q)) || 0) + 1);
+  const el = $("marks-row");
+  el.innerHTML = "";
+  const names = MARK_BUCKETS.map(b => b[0]).concat(counts.has("?") ? ["?"] : []);
+  for (const [label, on] of [["All", true], ["None", false]]) {
+    const b = document.createElement("button");
+    b.className = "chip small";
+    b.textContent = label;
+    b.onclick = () => { for (const n of names) on ? offMarks.delete(n) : offMarks.add(n); saveMarks(); };
+    el.appendChild(b);
+  }
+  for (const n of names) {
+    const b = document.createElement("button");
+    b.className = "chip" + (offMarks.has(n) ? "" : " on");
+    b.textContent = `${n === "?" ? "Unknown" : n + (n === "1" ? " mark" : " marks")} · ${counts.get(n) || 0}`;
+    b.setAttribute("aria-pressed", !offMarks.has(n));
+    b.onclick = () => { offMarks.has(n) ? offMarks.delete(n) : offMarks.add(n); saveMarks(); };
+    el.appendChild(b);
+  }
+}
+
+function saveMarks() {
+  store.set("offMarks", [...offMarks]);
+  renderMarks();
+  rebuildDeck();
+  if (!current || !inPool(current)) next();
 }
 
 function saveTopics(subject, el) {
@@ -319,7 +377,8 @@ async function show(q) {
     $("seen").classList.remove("hidden");
   }
   $("meta").innerHTML = `<span class="tag">${current.subject} ${current.unit}</span>
-    <span>${current.session} · ${current.label} · ${current.topics.join(", ")}</span>
+    ${current.calc ? '<span class="tag">Calculation</span>' : ""}
+    <span>${current.session} · ${current.label}${current.marks ? ` · ${current.marks} mark${current.marks > 1 ? "s" : ""}` : ""} · ${current.topics.join(", ")}</span>
     <a href="${current.qp}" target="_blank" rel="noopener">full paper</a>`;
   try {
     if (current.stem.length) await renderCrops($("question"), current.qp, current.stem);
