@@ -96,6 +96,11 @@ def parse_qp(path, split_parts=True):
             ends.append((p, y1 + 4 if t.startswith("(Total") else y0 - 2))
             continue
         m = Q_RE.match(t)
+        if (m and cur_q and int(m.group(1)) == cur_q and abs(x - qx) < 6 and size >= 10.5
+                and PART_RE.match(m.group(2)) and split_parts):
+            # the question is printed again (an overview page listing its parts came first): restart it
+            starts = [st for st in starts if st[0] != cur_q]
+            expect = cur_q
         if m and abs(x - qx) < 6 and size >= 10.5 and int(m.group(1)) == expect and not m.group(2).startswith("."):
             cur_q, cur_letter = expect, None
             expect += 1
@@ -109,6 +114,10 @@ def parse_qp(path, split_parts=True):
                 starts.append((cur_q, None, p, y0 - 4))
             continue
         pm = PART_RE.match(t) if split_parts else None
+        if pm and cur_q and qx + 8 < x < qx + 42 and pm.group(1) == "a" and cur_letter not in (None, "a"):
+            # parts start over at (a): what came before was an overview page, so restart the question
+            starts = [st for st in starts if st[0] != cur_q]
+            cur_letter = None
         if pm and cur_q and qx + 8 < x < qx + 42:
             want = "a" if cur_letter is None else string.ascii_lowercase[string.ascii_lowercase.index(cur_letter) + 1]
             if pm.group(1) == want:

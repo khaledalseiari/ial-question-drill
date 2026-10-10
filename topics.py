@@ -239,6 +239,47 @@ def text_of(path, crops):
     return " ".join(parts).lower()
 
 
+MARK_RE = re.compile(r"^\(\s*(\d{1,2})\s*\)$")
+TOTAL_RE = re.compile(r"\(\s*total(?: for question \d+)?\s*(?:=|is)?\s*(\d{1,2})\s*marks?\s*\)", re.I)
+CALC_RE = re.compile(r"\b(calculate|calculation|determine the (?:value|mass|number|volume|concentration|speed|time|energy|resistance|amount|percentage|enthalpy|ph|maximum|minimum|magnitude|force|current|wavelength|frequency|power|pressure|temperature|half-life|activity|charge|capacitance|radius)|show that|work out|estimate the|use the data)", re.I)
+NUM_OPTION_RE = re.compile(r"^[A-D]\s+[−–-]?\s*\d")
+
+
+def marks_of(path, crops, whole):
+    """Marks for a card: the paper's '(Total ... N marks)' for whole questions, else the sum of the
+    right-margin '(n)' mark labels inside its crops."""
+    doc = _docs.setdefault(path, pymupdf.open(path))
+    labels, total, text = 0, None, []
+    for p, x0, y0, x1, y1 in crops:
+        page = doc[p]
+        rows = []
+        for b in page.get_text("dict", clip=pymupdf.Rect(x0, y0, x1, y1))["blocks"]:
+            for l in b.get("lines", []):
+                t = "".join(sp["text"] for sp in l["spans"]).strip()
+                if t:
+                    rows.append((l["bbox"], t))
+        for (bx0, by0, bx1, by1), t in rows:
+            text.append(t)
+            m = MARK_RE.match(t)
+            # a mark label sits alone at the right of its row (bracketed numbers in tables don't)
+            alone = not any(abs(oy0 - by0) < 4 and ot != t and ox0 < bx0 for (ox0, oy0, _, _), ot in rows)
+            if m and bx0 > page.rect.width * 0.55 and alone:
+                labels += int(m.group(1))
+            tm = TOTAL_RE.search(t)
+            if tm:
+                total = int(tm.group(1))
+    if whole and total:
+        return total, text
+    return (labels or total), text
+
+
+def is_calc(q_lines, ms_text):
+    q_text = " ".join(q_lines)
+    if CALC_RE.search(q_text) or "example of calculation" in ms_text:
+        return True
+    return sum(1 for t in q_lines if NUM_OPTION_RE.match(t)) >= 3  # numeric multiple choice
+
+
 def score(spec, text):
     return {t: sum(w * len(p.findall(text)) for p, w in pats) for t, pats in spec.items()}
 
@@ -258,6 +299,11 @@ def main():
         else:
             topics = [t for t, v in s.most_common(2) if v >= best * 0.7]
         it["topics"] = topics
+        marks, q_lines = marks_of(it["qp_file"], it["q"], whole="(" not in it["label"])
+        if marks:
+            it["marks"] = marks
+        if it["subject"] in ("Chemistry", "Physics") and is_calc(q_lines, text_of(it["ms_file"], it["a"])):
+            it["calc"] = 1
         for t in topics:
             counts[(it["subject"], it["unit"], t)] += 1
         del it["qp_file"], it["ms_file"]
