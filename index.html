@@ -56,6 +56,7 @@
   .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
   .tabs { display: flex; gap: 4px; }
   .tabs button { padding: 5px 12px; font-size: 14px; border-color: transparent; background: transparent; color: var(--muted); }
+  .tabs a.tablink { padding: 5px 12px; font-size: 14px; color: var(--muted); text-decoration: none; border: 1px solid transparent; border-radius: 8px; }
   .tabs button.on { background: var(--panel); border-color: var(--line); color: var(--ink); font-weight: 600; }
   .seen { font-size: 13px; color: var(--muted); margin: -4px 0 10px; }
   .badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; }
@@ -84,6 +85,7 @@
   <nav class="tabs">
     <button id="tab-practice" class="on">Practice</button>
     <button id="tab-history">History</button>
+    <a href="predicted.html" class="tablink">Predicted</a>
   </nav>
   <span class="score" id="score"></span>
 </div></header>
@@ -482,6 +484,7 @@ function renderHistory() {
   if (rows.length > 500) list.insertAdjacentHTML("beforeend", `<li class="empty" style="display:block">Showing the latest 500.</li>`);
 }
 
+window.addEventListener("hashchange", () => { if (location.hash === "#history") setTab("history"); });
 $("tab-practice").onclick = () => setTab("practice");
 $("tab-history").onclick = () => setTab("history");
 $("hide-done").checked = hideDone;
@@ -506,7 +509,16 @@ fetch("data/questions.json").then(r => r.json()).then(data => {
   buildFilters();
   rebuildDeck();
   renderScore();
+  // arriving from the Predicted page ("#drill") or its History link ("#history")
+  let drill = null;
+  try { drill = location.hash === "#drill" && JSON.parse(sessionStorage.getItem("drill")); } catch {}
+  if (drill && drill.ids) {
+    deck = shuffle(drill.ids.map(id => byId.get(id)).filter(Boolean));
+    $("pool").textContent = `· ${drill.name} · ${deck.length} questions`;
+    window.history.replaceState(null, "", location.pathname);  // (`history` here is the attempts log)
+  }
   next();
+  if (location.hash === "#history") setTab("history");
 }).catch(() => {
   $("question").innerHTML = `<div class="loading">Couldn't load the question bank.</div>`;
 });

@@ -11,6 +11,9 @@ mode for drilling calculation questions unit by unit. Every rated attempt (with 
 History tab in your browser, so you can revisit questions or redo the ones you missed. Topics are tagged automatically by keyword matching
 (`topics.py`), so the odd question may land in the wrong topic or in "Other".
 
+The Predicted page (`predicted.html`, Biology U1 for now) shows which spec points come up in almost
+every paper, which are overdue, and which haven't appeared for a while, with a button to drill each one.
+
 ## Run locally
 
     python3 -m http.server 8765
@@ -25,7 +28,8 @@ and the browser loads each paper directly from Physics & Maths Tutor.
     python3 -m venv .venv && .venv/bin/pip install pymupdf requests
     .venv/bin/python download.py   # fetch QPs + MSs into pdfs/ (skips files already there)
     .venv/bin/python extract.py    # split into question parts -> data/questions.json
-    .venv/bin/python topics.py     # tag topics (run after every extract.py)
+    .venv/bin/python predict.py    # spec-point frequency analysis for the Predicted page
+    .venv/bin/python topics.py     # tag topics + marks (run last: it strips the local PDF paths)
 
 Questions are cut at the lettered-part level (e.g. Q3(a), with the Q3 stem shown above it; Maths
 questions are kept whole because later parts rely on set-up text between parts) and
