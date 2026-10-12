@@ -44,6 +44,9 @@
   .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 0 7px; border-radius: 999px; border: 1px solid currentColor; margin-left: 6px; vertical-align: 1px; }
   .pill.due { color: var(--due); } .pill.dormant { color: var(--warm); } .pill.regular { color: var(--hot); }
   .note { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--muted); font-size: 13px; margin-top: 28px; }
+  .units { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; }
+  .units a { font-size: 13px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); text-decoration: none; }
+  .units a.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
   .loading { color: var(--muted); padding: 24px; text-align: center; }
 </style>
 </head>
@@ -57,9 +60,9 @@
   </nav>
 </div></header>
 <main>
-  <h2>Biology Unit 1: what's likely next</h2>
-  <p class="lede" id="lede">Every Biology U1 paper since the current spec started, broken down by spec point:
-    what comes up almost every time, what is overdue, and what hasn't been seen for a while.</p>
+  <nav class="units" id="units"></nav>
+  <h2 id="title">What's likely next</h2>
+  <p class="lede" id="lede"></p>
   <div id="out"><div class="loading">Crunching past papers…</div></div>
   <div class="note">
     <strong>How this works.</strong> Each question in each paper is matched to spec points by the words in the question
@@ -90,8 +93,11 @@ const short = s => s.replace("January", "Jan").replace("June", "Jun").replace("O
 
 function render(data) {
   const n = data.sessions.length;
+  const unitName = `${data.subject} ${data.unit}`;
+  document.getElementById("title").textContent = `${data.subject} ${data.unit.replace("U", "Unit ")}: what's likely next`;
+  document.title = `Predicted · ${unitName}`;
   document.getElementById("lede").textContent =
-    `All ${n} Biology U1 papers from ${data.sessions[0]} to ${data.sessions[n - 1]}, broken down by spec point: ` +
+    `All ${n} ${unitName} papers from ${data.sessions[0]} to ${data.sessions[n - 1]}, broken down by spec point: ` +
     `what comes up almost every time, what is overdue, and what hasn't been seen for a while.`;
   const out = document.getElementById("out");
   out.innerHTML = "";
@@ -124,7 +130,7 @@ function render(data) {
       row.querySelector(".heading").textContent = p.heading;
       const btn = row.querySelector("button");
       if (btn) btn.onclick = () => {
-        try { sessionStorage.setItem("drill", JSON.stringify({ name: `Biology U1 · ${p.point}`, ids })); } catch {}
+        try { sessionStorage.setItem("drill", JSON.stringify({ name: `${unitName} · ${p.point}`, ids })); } catch {}
         location.href = "./#drill";
       };
       out.appendChild(row);
@@ -132,9 +138,14 @@ function render(data) {
   }
 }
 
-fetch("data/predict_biology_u1.json").then(r => r.json()).then(render).catch(() => {
-  document.getElementById("out").innerHTML = `<div class="loading">Couldn't load the analysis.</div>`;
-});
+const fail = () => { document.getElementById("out").innerHTML = `<div class="loading">Couldn't load the analysis.</div>`; };
+fetch("data/predict_index.json").then(r => r.json()).then(index => {
+  const want = new URLSearchParams(location.search).get("u");
+  const cur = index.find(u => u.key === want) || index[0];
+  document.getElementById("units").innerHTML = index.map(u =>
+    `<a href="?u=${u.key}" class="${u === cur ? "on" : ""}">${u.subject} ${u.unit}</a>`).join("");
+  return fetch(`data/predict_${cur.key}.json`).then(r => r.json()).then(render);
+}).catch(fail);
 </script>
 </body>
 </html>

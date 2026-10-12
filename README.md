@@ -11,7 +11,7 @@ mode for drilling calculation questions unit by unit. Every rated attempt (with 
 History tab in your browser, so you can revisit questions or redo the ones you missed. Topics are tagged automatically by keyword matching
 (`topics.py`), so the odd question may land in the wrong topic or in "Other".
 
-The Predicted page (`predicted.html`, Biology U1 for now) shows which spec points come up in almost
+The Predicted page (`predicted.html`: Biology U1–U2, Chemistry U2, Physics U2, Maths M1, P3, P4) shows which spec points come up in almost
 every paper, which are overdue, and which haven't appeared for a while, with a button to drill each one.
 
 ## Run locally
