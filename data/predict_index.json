@@ -16,6 +16,14 @@
   "to": "June 2025"
  },
  {
+  "key": "biology_u3",
+  "subject": "Biology",
+  "unit": "U3",
+  "papers": 17,
+  "from": "June 2019",
+  "to": "June 2025"
+ },
+ {
   "key": "chemistry_u2",
   "subject": "Chemistry",
   "unit": "U2",

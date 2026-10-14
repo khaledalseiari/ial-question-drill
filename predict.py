@@ -14,6 +14,8 @@ from topics import marks_of
 
 MONTH = {"January": 1, "May": 5, "June": 6, "October": 10, "November": 11}
 
+# Never examined in Biology U3 since 2019, so left out: the Daphnia/caffeine practical, ethics of using
+# organisms, quadrat fieldwork, serial dilutions, uncertainty and hypotheses.
 # Not on the IAL spec, so left out: lenses & Kirchhoff's laws (Physics U2), Newton-Raphson (P3).
 # spec point -> (topic heading, keywords). The U1 core practicals (vitamin C, Daphnia, beetroot) are
 # left out: on the IAL they are examined in Unit 3, and none appears in a U1 paper since 2019. Keywords as in topics.py: "phrase:weight".
@@ -164,9 +166,30 @@ MATHS_P4 = {
     "Vector equations of lines": ("Vectors", "vector equation:5, line l:4, lines l1:5, l1:4, l2:4, r =:4, position vector:4, direction vector:5, intersect:5, point of intersection:5, skew:5"),
     "Angles, perpendicularity & distances": ("Vectors", "acute angle:5, angle between:5, scalar product:5, perpendicular:5, shortest distance:5, closest:5, foot of the perpendicular:5, area of triangle:4, parallelogram:4, cos θ:2"),
 }
+BIO_U3 = {
+    "Core practical: vitamin C (DCPIP)": ("Core practicals", "vitamin c:5, dcpip:5, ascorbic acid:5"),
+    "Core practical: membrane permeability (beetroot)": ("Core practicals", "beetroot:5, betalain:5, pigment:3, permeability:5, membrane:2, leak:4, ethanol concentration:4"),
+    "Core practical: enzyme concentration & rate": ("Core practicals", "enzyme concentration:5, initial rate:5, trypsin:5, catalase:5, protease:4, casein:5, milk:3, hydrogen peroxide:4, enzyme:2, rate of reaction:3"),
+    "Core practical: mitosis & mitotic index": ("Core practicals", "mitotic index:5, root tip:5, squash:5, mitosis:4, stain:3, toluidine:5, acetic orcein:5, hydrochloric acid:3, garlic:4, onion:3"),
+    "Core practical: plant fibre tensile strength": ("Core practicals", "tensile strength:5, plant fibre:5, fibres:3, masses:3, snap:4, break:2, breaking:3"),
+    "Core practical: plant mineral deficiencies": ("Core practicals", "mineral:4, deficiency:5, nitrate:4, magnesium:4, calcium:4, culture solution:5, seedlings:4, chlorosis:5"),
+    "Core practical: antimicrobial properties of plants": ("Core practicals", "antimicrobial:5, antibacterial:5, inhibition zone:5, zone of inhibition:5, clear zone:5, agar plate:3, garlic:3, mint:4, plant extract:4"),
+    "Microscopy & staining": ("Practical techniques", "microscope:5, magnification:5, eyepiece graticule:5, graticule:5, stage micrometer:5, field of view:5, stain:4, slide:3, cover slip:5, coverslip:5"),
+    "Colorimetry & calibration curves": ("Practical techniques", "colorimeter:5, colorimetry:5, absorbance:5, transmission:5, calibration curve:5, standard curve:5, filter:3, cuvette:5"),
+    "Aseptic technique": ("Practical techniques", "aseptic:5, sterile:5, sterilis:5, inoculating loop:5, bunsen:4, flame:3, contamination:4, autoclav:5"),
+    "Variables & controls": ("Planning", "independent variable:5, dependent variable:5, control variable:5, controlled variable:5, control experiment:5, controlled:3, variable:3, kept constant:5, how this variable could be controlled:5"),
+    "Safety & risk assessment": ("Planning", "safety:5, risk:4, hazard:5, precaution:5, goggles:5, gloves:4, irritant:5, corrosive:5, harmful:4"),
+    "Accuracy, precision & repeatability": ("Data & evaluation", "accura:4, precis:4, repeatab:5, reproducib:5, reliab:4, valid:4, systematic error:5, random error:5, resolution:3"),
+    "Repeats, means & anomalies": ("Data & evaluation", "anomalous:5, anomaly:5, repeat:4, mean:4, average:3, outlier:5, range:3"),
+    "Graphs & lines of best fit": ("Data & evaluation", "plot a graph:5, draw a graph:5, line of best fit:5, curve of best fit:5, axes:4, graph paper:4, plot:3, scale:2, gradient:4, tangent:4"),
+    "Calculations (rates, % change, means)": ("Data & evaluation", "calculate:4, percentage change:5, percentage increase:5, percentage decrease:5, rate:3, show your working:4, answer:1"),
+    "Statistics (SD, correlation, tests)": ("Data & evaluation", "standard deviation:5, error bars:5, correlation:5, spearman:5, t-test:5, t test:5, statistical test:5, significant:4, significance:4, critical value:5, probability:3"),
+    "Conclusions & evaluation": ("Data & evaluation", "conclusion:5, conclude:4, evaluate:4, limitation:5, improvement:5, improve:4, suggest how:3, support the hypothesis:5, extend:3, further investigation:5"),
+}
 SPECS = {
     ("Biology", "U1"): BIO_U1,
     ("Biology", "U2"): BIO_U2,
+    ("Biology", "U3"): BIO_U3,
     ("Chemistry", "U2"): CHEM_U2,
     ("Physics", "U2"): PHY_U2,
     ("Maths", "M1"): MATHS_M1,
